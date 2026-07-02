@@ -1,4 +1,4 @@
-import { CancellationToken, Disposable, ExtensionContext, InputBoxValidationSeverity, LanguageModelChatInformation, LanguageModelChatMessage, LanguageModelChatMessageRole, LanguageModelChatProvider, LanguageModelResponsePart, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelToolResultPart, Progress, ProvideLanguageModelChatResponseOptions, window } from "vscode";
+import { CancellationToken, Disposable, ExtensionContext, InputBoxValidationSeverity, LanguageModelChatInformation, LanguageModelChatMessage, LanguageModelChatMessageRole, LanguageModelChatProvider, LanguageModelDataPart, LanguageModelResponsePart, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelToolResultPart, Progress, ProvideLanguageModelChatResponseOptions, window } from "vscode";
 import { Cerebras } from "@cerebras/cerebras_cloud_sdk";
 import { ChatCompletionCreateParams, ChatCompletionCreateParamsStreaming } from "@cerebras/cerebras_cloud_sdk/src/resources/chat/index.js";
 import { get_encoding, Tiktoken } from "tiktoken";
@@ -14,9 +14,11 @@ interface CerebrasModel {
 	maxOutputTokens: number;
 	defaultCompletionTokens: number;
 	toolCalling: boolean;
+	imageInput?: boolean;
 	supportsParallelToolCalls: boolean;
 	hasMultiTurnToolLimitations?: boolean;
 	supportsReasoningEffort?: boolean;
+	reasoningEffort?: 'low' | 'medium' | 'high';
 	supportsThinking?: boolean;
 	temperature?: number;
 	top_p?: number;
@@ -56,6 +58,20 @@ const PRODUCTION_MODELS: CerebrasModel[] = [
 // Preview models
 const PREVIEW_MODELS: CerebrasModel[] = [
 	{
+		id: "gemma-4-31b",
+		name: "Gemma 4 31B (preview)",
+		detail: "~1,850 tokens/sec",
+		maxInputTokens: 131072, // 131k paid tier, 65k free tier
+		maxOutputTokens: 40960, // 40k paid tier, 32k free tier
+		defaultCompletionTokens: DEFAULT_COMPLETION_TOKENS,
+		toolCalling: true,
+		imageInput: true,
+		supportsParallelToolCalls: false,
+		reasoningEffort: 'medium',
+		temperature: 1.0,
+		top_p: 0.95,
+	},
+	{
 		id: "zai-glm-4.7",
 		name: "GLM 4.7 (preview)",
 		detail: "~1,000 tokens/sec",
@@ -92,7 +108,7 @@ function getChatModelInfo(model: CerebrasModel): LanguageModelChatInformation {
 		version: "1.0.0",
 		capabilities: {
 			toolCalling: model.toolCalling,
-			imageInput: false,
+			imageInput: model.imageInput ?? false,
 		}
 	};
 }
@@ -207,12 +223,20 @@ export class CerebrasChatModelProvider implements LanguageModelChatProvider, Dis
 		// Handle text content, tool calls, and tool results
 		const cerebrasMessages: ChatCompletionMessage[] = messages.map(msg => {
 			const textContent: string[] = [];
+			const imageContent: ChatCompletionCreateParams.UserMessageRequest.ImageURLContent[] = [];
 			const toolCalls: ChatCompletionCreateParams.AssistantMessageRequest['tool_calls'] = [];
 			const role = msg.role;
 
 			for (const part of msg.content) {
 				if (part instanceof LanguageModelTextPart) {
 					textContent.push(part.value);
+				} else if (part instanceof LanguageModelDataPart && part.mimeType.startsWith('image/')) {
+					imageContent.push({
+						type: "image_url",
+						image_url: {
+							url: `data:${part.mimeType};base64,${Buffer.from(part.data).toString('base64')}`
+						}
+					});
 				} else if (part instanceof LanguageModelToolCallPart) {
 					toolCalls.push({
 						id: part.callId,
@@ -238,6 +262,16 @@ export class CerebrasChatModelProvider implements LanguageModelChatProvider, Dis
 			}
 
 			const messageContent = textContent.join('');
+
+			if (role === LanguageModelChatMessageRole.User && imageContent.length > 0) {
+				return {
+					role: "user",
+					content: [
+						...(messageContent ? [{ type: "text" as const, text: messageContent }] : []),
+						...imageContent
+					]
+				} satisfies ChatCompletionCreateParams.UserMessageRequest;
+			}
 
 			// Return message with tool calls if present
 			if (toolCalls.length > 0) {
@@ -275,11 +309,13 @@ export class CerebrasChatModelProvider implements LanguageModelChatProvider, Dis
 			stream: true,
 			temperature: foundModel.temperature ?? 0.1,
 			top_p: foundModel.top_p ?? undefined,
+			reasoning_effort: foundModel.reasoningEffort ?? undefined,
 		};
 
 		// Add tools if available
 		if (cerebrasTools && cerebrasTools.length > 0 && foundModel.toolCalling) {
 			requestOptions.tools = cerebrasTools;
+			requestOptions.parallel_tool_calls = foundModel.supportsParallelToolCalls;
 		}
 
 		const chatCompletion = await this.client.chat.completions.create(requestOptions);
