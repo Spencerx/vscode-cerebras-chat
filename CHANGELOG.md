@@ -2,6 +2,12 @@
 
 All notable changes to the Cerebras BYOK VS Code extension will be documented in this file.
 
+## `v0.1.21` (Unreleased)
+
+### Features
+- Add multimodal Gemma 4 31B in preview with tool calling and medium reasoning
+- Remove deprecated `llama3.1-8b` and `qwen-3-235b-a22b-instruct-2507` models
+
 ## `v0.1.20` (2026-02-15)
 
 ### Features
