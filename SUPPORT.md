@@ -46,7 +46,7 @@ When filing an issue, please include:
 
 ### What models are supported?
 
-In agent mode, Gemma 4 31B and Z.ai GLM 4.7 are supported.
+In agent mode, Gemma 4 31B is supported.
 
 In chat mode, the extension supports:
 
@@ -55,7 +55,6 @@ Production models:
 
 Preview models:
 - Gemma 4 31B
-- Z.ai GLM 4.7
 
 For detailed information about each model's capabilities and token speeds, please refer to the README.md file.
 
