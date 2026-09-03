@@ -61,22 +61,7 @@ const PRODUCTION_MODELS: CerebrasModel[] = [
 ];
 
 // Preview models
-const PREVIEW_MODELS: CerebrasModel[] = [
-	{
-		id: "gemma-4-31b",
-		name: "Gemma 4 31B (preview)",
-		detail: "~1,850 tokens/sec",
-		maxInputTokens: 131072, // 131k paid tier, 65k free tier
-		maxOutputTokens: 40960, // 40k paid tier, 32k free tier
-		defaultCompletionTokens: DEFAULT_COMPLETION_TOKENS,
-		toolCalling: true,
-		imageInput: true,
-		supportsParallelToolCalls: false,
-		reasoningEffort: 'medium',
-		temperature: 1.0,
-		top_p: 0.95,
-	},
-];
+const PREVIEW_MODELS: CerebrasModel[] = [];
 
 function getChatModelInfo(model: CerebrasModel): LanguageModelChatInformation {
 	return {
