@@ -33,6 +33,21 @@ const DEFAULT_COMPLETION_TOKENS = 8192;
 // Production models
 const PRODUCTION_MODELS: CerebrasModel[] = [
 	{
+		id: "qwen-3.8-27b",
+		name: "Qwen 3.8 27B",
+		maxInputTokens: 65536,
+		maxOutputTokens: 32768,
+		defaultCompletionTokens: DEFAULT_COMPLETION_TOKENS,
+		toolCalling: true,
+		imageInput: true,
+		supportsParallelToolCalls: true,
+		supportsReasoningEffort: true,
+		reasoningEffort: 'high',
+		supportsThinking: true,
+		temperature: 1.0,
+		top_p: 0.95,
+	},
+	{
 		id: "gpt-oss-120b",
 		name: "OpenAI GPT OSS",
 		detail: "~3,000 tokens/sec",

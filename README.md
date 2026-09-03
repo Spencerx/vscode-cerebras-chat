@@ -22,12 +22,13 @@ Here's how you can use Cerebras models in VS Code:
 
 ### Supported Models
 
-This extension provides support for **Gemma 4 31B in agent mode**, as well as the following models in chat mode. Gemma 4 also accepts PNG and JPEG image inputs.
+This extension provides support for **Qwen 3.8 27B and Gemma 4 31B in agent mode**, as well as the following models in chat mode. Qwen 3.8 and Gemma 4 also accept PNG and JPEG image inputs.
 
-| Model | Token Speed |
-|------------|-------------|
-| Gemma 4 31B (Preview) | ~1,850 tokens/sec |
-| OpenAI GPT OSS | ~3,000 tokens/sec |
+| Model | Release Stage | Token Speed |
+|------------|-------------|-------------|
+| Qwen 3.8 27B | Production | Not published |
+| Gemma 4 31B | Preview | ~1,850 tokens/sec |
+| OpenAI GPT OSS | Production | ~3,000 tokens/sec |
 
 ### Advanced Tips
 

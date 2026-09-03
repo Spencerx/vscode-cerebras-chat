@@ -46,11 +46,12 @@ When filing an issue, please include:
 
 ### What models are supported?
 
-In agent mode, Gemma 4 31B is supported.
+In agent mode, Qwen 3.8 27B and Gemma 4 31B are supported.
 
 In chat mode, the extension supports:
 
 Production models:
+- Qwen 3.8 27B
 - OpenAI GPT OSS
 
 Preview models:
