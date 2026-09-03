@@ -43,7 +43,6 @@ const PRODUCTION_MODELS: CerebrasModel[] = [
 		supportsParallelToolCalls: true,
 		supportsReasoningEffort: true,
 		reasoningEffort: 'high',
-		supportsThinking: true,
 		temperature: 1.0,
 		top_p: 0.95,
 	},
